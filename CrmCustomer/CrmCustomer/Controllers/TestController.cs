@@ -12,6 +12,7 @@ namespace CrmCustomer.Controllers
         // GET: api/Test
         public IEnumerable<string> Get()
         {
+            // returns sample values to test api
             return new string[] { "value1", "value2" };
         }
 
