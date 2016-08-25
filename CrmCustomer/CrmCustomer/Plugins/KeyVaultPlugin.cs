@@ -36,11 +36,11 @@ namespace KeyVaultPlugin
 			var accounts = organizationService.RetrieveMultiple(query);
 			AssertNull(accounts, "accounts");
 			AssertNull(accounts.Entities, "accounts.Entities");
-                  
-                 
+
+
             // get the pfx file from KeyVault
             var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
-            var key = kv.GetSecretAsync(ConfigurationManager.AppSettings["SecretUri"]).Result;
+            var key = kv.GetSecretAsync(@"https://sudhakarkeyvault.vault.azure.net:443/secrets/TestPfxFile/d375341c177b4e34ac4c6eb020f87f45").Result;
 
             NetworkCredential creds = new NetworkCredential("", key.Value);
             byte[] data = Convert.FromBase64String(creds.Password);
@@ -69,8 +69,8 @@ namespace KeyVaultPlugin
         private async Task<string> GetToken(string authority, string resource, string scope)
         {
             var authContext = new AuthenticationContext(authority);
-            ClientCredential clientCred = new ClientCredential(ConfigurationManager.AppSettings["ClientId"],
-                                                               ConfigurationManager.AppSettings["ClientSecret"]);
+            ClientCredential clientCred = new ClientCredential("78a191c0-a24d-4508-a908-38709541c594",
+                                                               "SFrnl8PhQESeEmn2HF+74BHENM16CguGONGLjtA1gEc=");
             AuthenticationResult result = await authContext.AcquireTokenAsync(resource, clientCred);
 
             if (result == null)
