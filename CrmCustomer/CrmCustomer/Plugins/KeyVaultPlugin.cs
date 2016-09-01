@@ -32,6 +32,7 @@ namespace KeyVaultPlugin
             QueryExpression query = new QueryExpression("account");
             query.ColumnSet.AllColumns = true;
 
+            // call to CRM Web service
             var accounts = organizationService.RetrieveMultiple(query);
 
             AssertNull(accounts, "accounts");
