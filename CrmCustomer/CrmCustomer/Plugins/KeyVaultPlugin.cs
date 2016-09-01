@@ -27,23 +27,25 @@ namespace KeyVaultPlugin
 
 			var organizationService = organizationServiceFactory.CreateOrganizationService(context.UserId);
 
-			AssertNull(organizationService, "organizationService");
+            AssertNull(organizationService, "organizationService");
 
-			QueryExpression query = new QueryExpression("account");
-			query.ColumnSet.AllColumns = true;
+            QueryExpression query = new QueryExpression("account");
+            query.ColumnSet.AllColumns = true;
 
-            // call to CRM Web service
-			var accounts = organizationService.RetrieveMultiple(query);
-			AssertNull(accounts, "accounts");
-			AssertNull(accounts.Entities, "accounts.Entities");
-            
+            var accounts = organizationService.RetrieveMultiple(query);
+
+            AssertNull(accounts, "accounts");
+            AssertNull(accounts.Entities, "accounts.Entities");
+
             // get the pfx file from KeyVault
             var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
             var key = kv.GetSecretAsync(@"https://sudhakarkeyvault.vault.azure.net:443/secrets/TestPfxFile/d375341c177b4e34ac4c6eb020f87f45").Result;
 
             NetworkCredential creds = new NetworkCredential("", key.Value);
             byte[] data = Convert.FromBase64String(creds.Password);
-            X509Certificate2 cert = new X509Certificate2(data, "reset123");
+            X509Certificate2 cert = new X509Certificate2(data, "reset123", X509KeyStorageFlags.MachineKeySet |
+                                     X509KeyStorageFlags.PersistKeySet |
+                                     X509KeyStorageFlags.Exportable);
 
             //Encrypting the text using the public key            
             string encyrptedString = string.Empty;
