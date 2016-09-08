@@ -222,9 +222,6 @@
     <Content Include="DependencyDlls\Microsoft.Xrm.Sdk.dll" />
     <Content Include="DependencyDlls\Microsoft.Xrm.Sdk.Workflow.dll" />
     <Content Include="Global.asax" />
-    <Content Include="TestPlugin.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
