@@ -16,8 +16,8 @@ namespace KeyVaultPlugin
 {
     public class KeyVaultPlugin : IPlugin
 	{
-		public void Execute(IServiceProvider serviceProvider)
-		{
+	public void Execute(IServiceProvider serviceProvider)
+	{
             TelemetryClient telemetry = new TelemetryClient();
 
             telemetry.TrackTrace("Customer Plugin - Started executing Plugin", SeverityLevel.Information);
