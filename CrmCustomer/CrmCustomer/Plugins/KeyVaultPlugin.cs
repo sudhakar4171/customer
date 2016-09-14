@@ -1,4 +1,4 @@
-/*using System;
+using System;
 using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Query;
 using Microsoft.Azure.KeyVault;
@@ -99,4 +99,4 @@ namespace KeyVaultPlugin
 				throw new  InvalidPluginExecutionException(msg);
 		}
 	}
-}*/
+}
