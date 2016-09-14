@@ -9,6 +9,8 @@ using System.Text;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace KeyVaultPlugin
 {
@@ -16,7 +18,12 @@ namespace KeyVaultPlugin
 	{
 		public void Execute(IServiceProvider serviceProvider)
 		{
-			IPluginExecutionContext context = (IPluginExecutionContext)
+            TelemetryClient telemetry = new TelemetryClient();
+
+            telemetry.TrackTrace("Customer Plugin - Started executing Plugin", SeverityLevel.Information);
+            telemetry.TrackEvent("Start - Customer KeyVault Plugin");
+
+            IPluginExecutionContext context = (IPluginExecutionContext)
 					serviceProvider.GetService(typeof(IPluginExecutionContext));
 
 			var organizationServiceFactory = (IOrganizationServiceFactory)
@@ -37,6 +44,8 @@ namespace KeyVaultPlugin
 
             AssertNull(accounts, "accounts");
             AssertNull(accounts.Entities, "accounts.Entities");
+
+            telemetry.TrackTrace("Customer Plugin - Retrieved records from CRM - Count: " + accounts.Entities.Count, SeverityLevel.Information);
 
             // get the pfx file from KeyVault
             var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
@@ -65,6 +74,9 @@ namespace KeyVaultPlugin
                 byte[] bytesDecrypted = csp.Decrypt(bytesEncrypted, false);
                 decryptedString = Encoding.UTF8.GetString(bytesDecrypted);
             }
+
+            telemetry.TrackEvent("End - Customer KeyVault Plugin");
+            telemetry.TrackTrace("Customer Plugin - Ended executing Plugin", SeverityLevel.Information);
         }
 
         //the method that will be provided to the KeyVaultClient
