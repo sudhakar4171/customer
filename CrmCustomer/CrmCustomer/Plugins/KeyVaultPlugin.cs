@@ -76,7 +76,7 @@ namespace KeyVaultPlugin
             }
 
             telemetry.TrackEvent("End - Customer KeyVault Plugin");
-            telemetry.TrackTrace("Customer Plugin - Ended executing Plugin", SeverityLevel.Information);
+            telemetry.TrackTrace("Customer Plugin - Ended executing KeyVault Plugin", SeverityLevel.Information);
         }
 
         //the method that will be provided to the KeyVaultClient
