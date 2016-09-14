@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 
+
 namespace KeyVaultPlugin
 {
     public class KeyVaultPlugin : IPlugin
