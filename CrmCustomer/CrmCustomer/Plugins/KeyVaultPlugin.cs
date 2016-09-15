@@ -16,23 +16,33 @@ namespace KeyVaultPlugin
 {
     public class KeyVaultPlugin : IPlugin
 	{
-	public void Execute(IServiceProvider serviceProvider)
-	{
-            TelemetryClient telemetry = new TelemetryClient();
+        private Guid serviceEndpointId;
+        private TelemetryClient telemetry = new TelemetryClient();
 
+        public KeyVaultPlugin(string config)
+        {
+            if (String.IsNullOrEmpty(config) || !Guid.TryParse(config, out serviceEndpointId))
+            {
+                telemetry.TrackTrace("Customer Plugin - Constructor exception", SeverityLevel.Error);
+                throw new InvalidPluginExecutionException("Service endpoint ID should be passed as config.");
+            }
+        }
+
+        public void Execute(IServiceProvider serviceProvider)
+        {
             telemetry.TrackTrace("Customer Plugin - Started executing Plugin", SeverityLevel.Information);
             telemetry.TrackEvent("Start - Customer KeyVault Plugin");
 
             IPluginExecutionContext context = (IPluginExecutionContext)
-					serviceProvider.GetService(typeof(IPluginExecutionContext));
+                    serviceProvider.GetService(typeof(IPluginExecutionContext));
 
-			var organizationServiceFactory = (IOrganizationServiceFactory)
-					serviceProvider.GetService(typeof (IOrganizationServiceFactory));
+            var organizationServiceFactory = (IOrganizationServiceFactory)
+                    serviceProvider.GetService(typeof(IOrganizationServiceFactory));
 
-			AssertNull(context, "context");
-			AssertNull(organizationServiceFactory, "organizationServiceFactory");
+            AssertNull(context, "context");
+            AssertNull(organizationServiceFactory, "organizationServiceFactory");
 
-			var organizationService = organizationServiceFactory.CreateOrganizationService(context.UserId);
+            var organizationService = organizationServiceFactory.CreateOrganizationService(context.UserId);
 
             AssertNull(organizationService, "organizationService");
 
@@ -41,6 +51,17 @@ namespace KeyVaultPlugin
 
             // call to CRM Web service
             var accounts = organizationService.RetrieveMultiple(query);
+
+            // do service bus operations
+            IServiceEndpointNotificationService cloudService = (IServiceEndpointNotificationService)serviceProvider.GetService(typeof(IServiceEndpointNotificationService));
+            if (cloudService == null)
+                throw new InvalidPluginExecutionException("Failed to retrieve the service bus service.");
+            telemetry.TrackTrace("Customer Plugin - going to post to service bus", SeverityLevel.Information);
+            string response = cloudService.Execute(new EntityReference("serviceendpoint", serviceEndpointId), context);
+            if (!String.IsNullOrEmpty(response))
+            {
+                telemetry.TrackTrace("service bus Response = " + response, SeverityLevel.Information);
+            }
 
             AssertNull(accounts, "accounts");
             AssertNull(accounts.Entities, "accounts.Entities");
