@@ -4,6 +4,8 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 
 namespace CrmCustomer.Controllers
 {
@@ -12,6 +14,11 @@ namespace CrmCustomer.Controllers
         // GET: api/Test
         public IEnumerable<string> Get()
         {
+            TelemetryClient telemetry = new TelemetryClient();
+
+            telemetry.TrackTrace("TEST controller TRACE", SeverityLevel.Information);
+            telemetry.TrackEvent("TEST controller - Event");
+
             // returns sample values to test api
             return new string[] { "value1", "value2" };
         }
