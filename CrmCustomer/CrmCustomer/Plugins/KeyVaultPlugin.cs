@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.IdentityModel.Clients.ActiveDirectory;
 using Microsoft.ApplicationInsights;
 using Microsoft.ApplicationInsights.DataContracts;
+using Microsoft.Azure.NotificationHubs;
 
 namespace KeyVaultPlugin
 {
@@ -50,23 +51,13 @@ namespace KeyVaultPlugin
             query.ColumnSet.AllColumns = true;
 
             // call to CRM Web service
-            var accounts = organizationService.RetrieveMultiple(query);
-
-            // do service bus operations
-            IServiceEndpointNotificationService cloudService = (IServiceEndpointNotificationService)serviceProvider.GetService(typeof(IServiceEndpointNotificationService));
-            if (cloudService == null)
-                throw new InvalidPluginExecutionException("Failed to retrieve the service bus service.");
-            telemetry.TrackTrace("Customer Plugin - going to post to service bus", SeverityLevel.Information);
-            string response = cloudService.Execute(new EntityReference("serviceendpoint", serviceEndpointId), context);
-            if (!String.IsNullOrEmpty(response))
-            {
-                telemetry.TrackTrace("service bus Response = " + response, SeverityLevel.Information);
-            }
+            var accounts = organizationService.RetrieveMultiple(query);           
 
             AssertNull(accounts, "accounts");
             AssertNull(accounts.Entities, "accounts.Entities");
 
             telemetry.TrackTrace("Customer Plugin - Retrieved records from CRM - Count: " + accounts.Entities.Count, SeverityLevel.Information);
+                        
 
             // get the pfx file from KeyVault
             var kv = new KeyVaultClient(new KeyVaultClient.AuthenticationCallback(GetToken));
@@ -98,6 +89,24 @@ namespace KeyVaultPlugin
 
             telemetry.TrackEvent("End - Customer KeyVault Plugin");
             telemetry.TrackTrace("Customer Plugin - Ended executing KeyVault Plugin", SeverityLevel.Information);
+
+
+            // push message to Azure notification hub
+            SendNotificationToAzureHubAsync();
+        }
+
+        // send notification
+        private static async void SendNotificationToAzureHubAsync()
+        {
+            NotificationHubClient hub = NotificationHubClient
+                .CreateClientFromConnectionString(@"Endpoint=sb://sudreddyns.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=EQYi5yybz03lwcy+bPbfVwtxnERZxAjWhJBVwdRgpmk=", "sudreddy");
+            string toast = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
+                "<wp:Notification xmlns:wp=\"WPNotification\">" +
+                   "<wp:Toast>" +
+                        "<wp:Text1>Hello from a CRM Plugin !!!</wp:Text1>" +
+                   "</wp:Toast> " +
+                "</wp:Notification>";
+            await hub.SendMpnsNativeNotificationAsync(toast);
         }
 
         //the method that will be provided to the KeyVaultClient
