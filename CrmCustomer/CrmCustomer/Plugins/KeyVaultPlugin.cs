@@ -99,7 +99,7 @@ namespace KeyVaultPlugin
         private static async void SendNotificationToAzureHubAsync()
         {
             NotificationHubClient hub = NotificationHubClient
-                .CreateClientFromConnectionString(@"Endpoint=sb://sudreddyns.servicebus.windows.net/;SharedAccessKeyName=DefaultFullSharedAccessSignature;SharedAccessKey=EQYi5yybz03lwcy+bPbfVwtxnERZxAjWhJBVwdRgpmk=", "sudreddy");
+                .CreateClientFromConnectionString(Environment.GetEnvironmentVariable("Azure_Notification_Hub"), "sudreddy");
             string toast = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                 "<wp:Notification xmlns:wp=\"WPNotification\">" +
                    "<wp:Toast>" +
@@ -115,7 +115,7 @@ namespace KeyVaultPlugin
             var authContext = new AuthenticationContext(authority);
 
             ClientCredential clientCred = new ClientCredential("78a191c0-a24d-4508-a908-38709541c594",
-                                                               "SFrnl8PhQESeEmn2HF+74BHENM16CguGONGLjtA1gEc=");
+                                                               Environment.GetEnvironmentVariable("Azure_Key_Vault_Secret"));
             AuthenticationResult result = await authContext.AcquireTokenAsync(resource, clientCred);
 
             if (result == null)
