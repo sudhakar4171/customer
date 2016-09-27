@@ -16,18 +16,8 @@ using Microsoft.Azure.NotificationHubs;
 namespace KeyVaultPlugin
 {
     public class KeyVaultPlugin : IPlugin
-	{
-        private Guid serviceEndpointId;
-        private TelemetryClient telemetry = new TelemetryClient();
-
-        public KeyVaultPlugin(string config)
-        {
-            if (String.IsNullOrEmpty(config) || !Guid.TryParse(config, out serviceEndpointId))
-            {
-                telemetry.TrackTrace("Customer Plugin - Constructor exception", SeverityLevel.Error);
-                throw new InvalidPluginExecutionException("Service endpoint ID should be passed as config.");
-            }
-        }
+	{      
+        private TelemetryClient telemetry = new TelemetryClient();       
 
         public void Execute(IServiceProvider serviceProvider)
         {
@@ -89,7 +79,6 @@ namespace KeyVaultPlugin
 
             telemetry.TrackEvent("End - Customer KeyVault Plugin");
             telemetry.TrackTrace("Customer Plugin - Ended executing KeyVault Plugin", SeverityLevel.Information);
-
 
             // push message to Azure notification hub
             SendNotificationToAzureHubAsync();
