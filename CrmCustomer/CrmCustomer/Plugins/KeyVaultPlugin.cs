@@ -30,6 +30,9 @@ namespace KeyVaultPlugin
             var organizationServiceFactory = (IOrganizationServiceFactory)
                     serviceProvider.GetService(typeof(IOrganizationServiceFactory));
 
+            Entity entity = (Entity)context.InputParameters["Target"];
+            string inputAccName = entity.Attributes["name"].ToString();
+
             AssertNull(context, "context");
             AssertNull(organizationServiceFactory, "organizationServiceFactory");
 
@@ -81,18 +84,18 @@ namespace KeyVaultPlugin
             telemetry.TrackTrace("Customer Plugin - Ended executing KeyVault Plugin", SeverityLevel.Information);
 
             // push message to Azure notification hub
-            SendNotificationToAzureHubAsync();
+            SendNotificationToAzureHubAsync(inputAccName);
         }
 
         // send notification
-        private static async void SendNotificationToAzureHubAsync()
+        private static async void SendNotificationToAzureHubAsync(string accountName)
         {
             NotificationHubClient hub = NotificationHubClient
                 .CreateClientFromConnectionString(Environment.GetEnvironmentVariable("Azure_Notification_Hub"), "sudreddy");
             string toast = "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                 "<wp:Notification xmlns:wp=\"WPNotification\">" +
                    "<wp:Toast>" +
-                        "<wp:Text1>Hello from a CRM Plugin !!!</wp:Text1>" +
+                        "<wp:Text1>Hello to " + accountName + " from a CRM Plugin !!!</wp:Text1>" +
                    "</wp:Toast> " +
                 "</wp:Notification>";
             await hub.SendMpnsNativeNotificationAsync(toast);
